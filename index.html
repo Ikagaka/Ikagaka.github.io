@@ -1,0 +1,24 @@
+<script src="./vender/encoding.js"></script>
+<script src="./vender/js-yaml.min.js"></script>
+<script src="./vender/jszip.min.js"></script>
+<script src="./vender/surfaces_txt2yaml.js"></script>
+<script src="./vender/WMDescript.js"></script>
+<script src="./vender/XHRProxy.min.js"></script>
+<script src="./vender/zepto.min.js"></script>
+<script src="./ikagaka.js"></script>
+<script>
+new Ikagaka("./vender/exice_z102.zip", function(err, ikgk){
+
+  console.log(ikgk);
+
+  srf = ikgk.getSurface(0, 0);
+
+  console.log(srf);
+
+  srf.setEventListener(function(ev){
+    console.log(ev);
+  });
+
+  document.body.appendChild(srf.canvas);
+});
+</script>
