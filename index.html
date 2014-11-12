@@ -6,19 +6,37 @@
 <script src="./vender/XHRProxy.min.js"></script>
 <script src="./vender/zepto.min.js"></script>
 <script src="./ikagaka.js"></script>
+<input id="surfaceId" type="number" value="2010" />
 <script>
-new Ikagaka("./vender/exice_z102.zip", function(err, ikgk){
+$(function(){
 
-  console.log(ikgk);
+  new Ikagaka("./vender/ku-ver06.1.nar", function(err, ikgk){
+    if(!!err) return console.error(err.stack);
 
-  srf = ikgk.getSurface(0, 0);
+    console.log(ikgk);
 
-  console.log(srf);
+    var srf = ikgk.getSurface(0, 2010);
+    srf.setEventListener(function(ev){
+      console.log(ev);
+    });
+    document.body.appendChild(srf.canvas);
 
-  srf.setEventListener(function(ev){
-    console.log(ev);
+    $("#surfaceId").change(function(ev){
+      if(!!srf){
+        document.body.removeChild(srf.canvas);
+        srf.destructor();
+      }
+      srf = ikgk.getSurface(0, Number($(ev.target).val()));
+      if(!srf) return;
+      srf.setEventListener(function(ev){
+        console.log(ev);
+      });
+
+      document.body.appendChild(srf.canvas);
+    });
+
+
   });
 
-  document.body.appendChild(srf.canvas);
 });
 </script>

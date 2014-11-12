@@ -11,9 +11,8 @@ Surface = (function() {
     this.surfaces = surfaces;
     this.is = srf.is;
     this.base = srf.base;
-    this.regions = srf.regions;
-    this.animations = srf.animations;
-    console.log(srf);
+    this.regions = srf.regions || {};
+    this.animations = srf.animations || {};
     this.canvas = Ikagaka.copyCanvas(this.base);
     this.destructed = false;
     this.layers = [];
@@ -84,9 +83,7 @@ Surface = (function() {
   Surface.prototype.destructor = function() {
     $(this.canvas).off();
     this.stopAnimation();
-    this.destructed = true;
-    this.base = null;
-    return this.canvas = null;
+    return this.destructed = true;
   };
 
   Surface.prototype.render = function() {
@@ -116,12 +113,14 @@ Surface = (function() {
         });
       };
     })(this)), []);
-    return Ikagaka.composeElements(this.canvas, [
+    this.canvas.width = this.canvas.width;
+    Ikagaka.composeElements(this.canvas, [
       {
         "type": "base",
         "canvas": this.base
       }
     ].concat(elements));
+    return void 0;
   };
 
   Surface.prototype.playAnimation = function(animationId, callback) {
@@ -390,21 +389,29 @@ Ikagaka = (function() {
   };
 
   Ikagaka.composeElements = function(target, elements) {
-    var canvas, comporsed, type, x, y, _ref;
+    var canvas, comporsed, copyed, offsetX, offsetY, type, x, y, _ref;
     if (elements.length === 0) {
       return target;
     } else {
       _ref = elements[0], canvas = _ref.canvas, type = _ref.type, x = _ref.x, y = _ref.y;
+      offsetX = offsetY = 0;
       comporsed = (function() {
         switch (type) {
           case "base":
-            return Ikagaka.overlayfastCanvas(target, canvas);
+            return Ikagaka.overlayfastCanvas(target, canvas, offsetX, offsetY);
           case "overlay":
-            return Ikagaka.overlayfastCanvas(target, canvas, x, y);
+            return Ikagaka.overlayfastCanvas(target, canvas, offsetX + x, offsetY + y);
           case "overlayfast":
-            return Ikagaka.overlayfastCanvas(target, canvas, x, y);
+            return Ikagaka.overlayfastCanvas(target, canvas, offsetX + x, offsetY + y);
+          case "move":
+            offsetX = x;
+            offsetY = y;
+            copyed = Ikagaka.copyCanvas(target);
+            target.width = target.width;
+            return Ikagaka.overlayfastCanvas(target, copyed, offsetX, offsetY);
           default:
-            return console.error(type);
+            console.error(elements[0]);
+            return target;
         }
       })();
       return Ikagaka.composeElements(comporsed, elements.slice(1));

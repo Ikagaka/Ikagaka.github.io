@@ -3,9 +3,8 @@ class Surface
   constructor: (@scopeId, srf, @surfaces)->
     @is = srf.is
     @base = srf.base
-    @regions = srf.regions
-    @animations = srf.animations
-    console.log srf
+    @regions = srf.regions || {}
+    @animations = srf.animations || {}
     @canvas = Ikagaka.copyCanvas(@base)
     @destructed = false
     @layers = []
@@ -38,8 +37,6 @@ class Surface
     $(@canvas).off() # g.c.
     @stopAnimation()
     @destructed = true
-    @base = null
-    @canvas = null
   render: ->
     srfs = @surfaces.surfaces
     elements = @layers.reduce(((arr, layer)=>
@@ -52,7 +49,9 @@ class Surface
       if hits.length is 0 then return arr
       arr.concat({type, x, y, canvas: srfs[hits[hits.length-1]].base})
     ), [])
+    @canvas.width = @canvas.width
     Ikagaka.composeElements(@canvas, [{"type": "base", "canvas": @base}].concat(elements))
+    undefined
   playAnimation: (animationId, callback)->
     hits = Object
       .keys(@animations)
@@ -209,11 +208,18 @@ class Ikagaka
     then target
     else
       {canvas, type, x, y} = elements[0]
+      offsetX = offsetY = 0
       comporsed = switch type
-        when "base"    then Ikagaka.overlayfastCanvas(target, canvas)
-        when "overlay" then Ikagaka.overlayfastCanvas(target, canvas, x, y)
-        when "overlayfast" then Ikagaka.overlayfastCanvas(target, canvas, x, y)
-        else console.error type
+        when "base"    then Ikagaka.overlayfastCanvas(target, canvas, offsetX, offsetY)
+        when "overlay" then Ikagaka.overlayfastCanvas(target, canvas, offsetX + x, offsetY + y)
+        when "overlayfast" then Ikagaka.overlayfastCanvas(target, canvas, offsetX + x, offsetY + y)
+        when "move"
+          offsetX = x
+          offsetY = y
+          copyed = Ikagaka.copyCanvas(target)
+          target.width = target.width
+          Ikagaka.overlayfastCanvas(target, copyed, offsetX, offsetY)
+        else console.error(elements[0]); target
       Ikagaka.composeElements(comporsed, elements.slice(1))
   @overlayfastCanvas = (target, part, x, y)->
     ctx = target.getContext("2d")
