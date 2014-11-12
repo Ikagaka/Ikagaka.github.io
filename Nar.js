@@ -73,8 +73,8 @@ Nar = (function() {
         return callback(new Error(xhr.status), null);
       }
     });
-    xhr.responseType = type;
     xhr.open("GET", url);
+    xhr.responseType = type;
     xhr.send();
     return void 0;
   };

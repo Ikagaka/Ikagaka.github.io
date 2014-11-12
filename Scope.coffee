@@ -13,13 +13,8 @@ class Scope
           border: none;
           margin: 0px;
           padding: 0px;
-          -webkit-user-select:none;
-          -webkit-tap-highlight-color:transparent;
-        }
-        .balloon {
-          position: absolute;
-          top: #{@shell.descript["sakura.balloon.offsetx"] || 0}px;
-          left: #{@shell.descript["sakura.balloon.offsety"] || 0}px;
+          -webkit-user-select: none;
+          -webkit-tap-highlight-color: transparent;
         }
       """)
     @$surface = $("<div />")

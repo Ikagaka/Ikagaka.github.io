@@ -9,7 +9,7 @@ Scope = (function() {
       "bottom": "0px",
       "right": (this.scopeId * 240) + "px"
     });
-    this.$style = $("<style scoped />").html(".scope {\n  position: absolute;\n  border: none;\n  margin: 0px;\n  padding: 0px;\n  -webkit-user-select:none;\n  -webkit-tap-highlight-color:transparent;\n}\n.balloon {\n  position: absolute;\n  top: " + (this.shell.descript["sakura.balloon.offsetx"] || 0) + "px;\n  left: " + (this.shell.descript["sakura.balloon.offsety"] || 0) + "px;\n}");
+    this.$style = $("<style scoped />").html(".scope {\n  position: absolute;\n  border: none;\n  margin: 0px;\n  padding: 0px;\n  -webkit-user-select: none;\n  -webkit-tap-highlight-color: transparent;\n}");
     this.$surface = $("<div />").addClass("surface").hide();
     this.$balloon = $("<div />").addClass("balloon").hide();
     this.$scope.append(this.$surface).append(this.$balloon).append(this.$style);

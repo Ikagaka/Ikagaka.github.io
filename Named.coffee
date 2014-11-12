@@ -6,16 +6,16 @@ class Named
     @$named = $("<div />")
       .addClass("named")
     @$style = $("<style scoped />")
-      .html("""
-      """)
+      .html("")
     @$named.append(@$style)
     @element = @$named[0]
     @scopes = []
     @currentScope = null
   # Named#scope(scopeId:Number|undefined):Scope
   scope: (scopeId)->
-    if scopeId isnt undefined and !@scopes[scopeId]
-      @scopes[scopeId] = new Scope(scopeId, @shell)
+    if scopeId isnt undefined
+      if !@scopes[scopeId]
+        @scopes[scopeId] = new Scope(scopeId, @shell)
       @currentScope = @scopes[scopeId]
       @$named.append(@scopes[scopeId].element)
     @currentScope

@@ -13,8 +13,10 @@ Named = (function() {
   }
 
   Named.prototype.scope = function(scopeId) {
-    if (scopeId !== void 0 && !this.scopes[scopeId]) {
-      this.scopes[scopeId] = new Scope(scopeId, this.shell);
+    if (scopeId !== void 0) {
+      if (!this.scopes[scopeId]) {
+        this.scopes[scopeId] = new Scope(scopeId, this.shell);
+      }
       this.currentScope = this.scopes[scopeId];
       this.$named.append(this.scopes[scopeId].element);
     }

@@ -40,8 +40,8 @@ class Nar
         then callback(new Error(xhr.response.error.message), null)
         else callback(null, xhr.response)
       else callback(new Error(xhr.status), null)
-    xhr.responseType = type
     xhr.open("GET", url)
+    xhr.responseType = type
     xhr.send()
     undefined
   # Nar.readDescript(text:String):{[key:String]: value:String}

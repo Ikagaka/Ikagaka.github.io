@@ -8,24 +8,40 @@ class Balloon
     @$style = $("<style scoped />")
       .html("""
         .box {
-          background: #ccc;
+          position: absolute;
+          top: -150px;
+          left: 0px;
           height: 150px;
-          width: 300px;
+          width: 280px;
+          background: #ccc;
           overflow-y: scroll;
           white-space: pre;
           white-space: pre-wrap;
           white-space: pre-line;
           word-wrap: break-word;
         }
-        .anchor,.select{
+        .text {
+          padding: 1em;
+        }
+        .anchor,
+        .select {
           color:red;
           cursor:pointer;
         }
-        .anchor:hover,.select:hover{
+        .anchor:hover,
+        .select:hover {
           background-color:violet;
         }
       """)
-    @$balloon.append(@$style)
+    @$text = $("<div />")
+      .addClass("text")
+    @$balloon
+      .append(@$style)
+      .append(@$text)
     @element = @$balloon[0]
   talk: (text)->
+    @$text.html(@$text.html() + text)
+    undefined
   clear: ->
+    @$text.html("")
+    undefined
