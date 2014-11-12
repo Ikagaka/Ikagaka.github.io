@@ -45,6 +45,13 @@ SurfaceUtil = (function() {
     return void 0;
   };
 
+  SurfaceUtil.prototype.init = function(cnv) {
+    this.cnv.width = cnv.width;
+    this.cnv.height = cnv.height;
+    this.overlayfast(cnv, 0, 0);
+    return void 0;
+  };
+
   SurfaceUtil.clear = function(cnv) {
     cnv.width = cnv.width;
     return void 0;

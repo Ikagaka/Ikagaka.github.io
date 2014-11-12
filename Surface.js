@@ -14,8 +14,8 @@ Surface = (function() {
     this.regions = srf.regions || {};
     this.animations = srf.animations || {};
     this.canvas = SurfaceUtil.copy(this.base);
-    this.destructed = false;
     this.layers = [];
+    this.stop = false;
     this.listener = function() {};
     $(this.canvas).on("click", (function(_this) {
       return function(ev) {
@@ -56,6 +56,7 @@ Surface = (function() {
       return function(name) {
         var interval, n, pattern, tmp, _is, _ref;
         _ref = _this.animations[name], _is = _ref.is, interval = _ref.interval, pattern = _ref.pattern;
+        interval = interval || "";
         tmp = interval.split(",");
         interval = tmp[0];
         n = Number(tmp.slice(1).join(","));
@@ -93,7 +94,7 @@ Surface = (function() {
   Surface.prototype.destructor = function() {
     $(this.canvas).off();
     this.stopAnimation();
-    this.destructed = true;
+    this.layers = [];
     return void 0;
   };
 
@@ -155,6 +156,9 @@ Surface = (function() {
             surface = pattern.surface, wait = pattern.wait;
             _this.layers[anim.is] = pattern;
             _this.render();
+            if (_this.stop) {
+              return console.info("animation stoped");
+            }
             return setTimeout(resolve, wait * 10);
           });
         };
@@ -162,14 +166,19 @@ Surface = (function() {
     })(this)).reduce((function(proA, proB) {
       return proA.then(proB);
     }), Promise.resolve()).then(function() {
-      return setTimeout(callback);
+      if (!this.stop) {
+        return setTimeout(callback);
+      }
     })["catch"](function(err) {
       return console.error(err.stack);
     });
     return void 0;
   };
 
-  Surface.prototype.stopAnimation = function(id) {};
+  Surface.prototype.stopAnimation = function(id) {
+    this.stop = true;
+    return false;
+  };
 
   Surface.sometimes = function(callback) {
     return this.random(callback, 2);
@@ -185,7 +194,11 @@ Surface = (function() {
     while (Math.round(Math.random() * 1000) > 1000 / n) {
       ms++;
     }
-    return setTimeout(callback, ms * 1000);
+    return setTimeout((function() {
+      return callback(function() {
+        return Surface.random(callback, n);
+      });
+    }), ms * 1000);
   };
 
   Surface.runonce = function(callback) {
@@ -194,7 +207,7 @@ Surface = (function() {
 
   Surface.always = function(callback) {
     return callback(function() {
-      return callback();
+      return Surface.always(callback);
     });
   };
 

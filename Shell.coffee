@@ -14,7 +14,7 @@ class Shell
       if !!err then return callback(err, null)
       @surfaces = Shell.createBaseSurfaces(loaded)
       callback(null, @)
-  # Shell#getSurface(scopeId:Number, surfaceId:Number|String):Surface
+  # Shell#getSurface(scopeId:Number, surfaceId:Number|String):Surface|null
   getSurface: (scopeId, surfaceId)->
     # alias choice process with scopeID
     # @surfaces.sakrua

@@ -27,6 +27,11 @@ class SurfaceUtil
     @ctx.drawImage(part, x||0, y||0)
     @cnv
     undefined
+  init: (cnv)->
+    @cnv.width = cnv.width
+    @cnv.height = cnv.height
+    @overlayfast(cnv, 0, 0)
+    undefined
   # SurfaceUtil.clear(cnv:HTMLCanvasElement):HTMLCanvasElement
   @clear = (cnv)->
     cnv.width = cnv.width

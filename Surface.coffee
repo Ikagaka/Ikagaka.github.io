@@ -2,15 +2,15 @@
 
 class Surface
   $ = window["Zepto"] || window["jQuery"]
-  # new Surface(scopeId:Number, srf:{is:Number, base:HTMLCanvasElement, regions:Object|null, elements:Object|null, animations:Object|null})
+  # new Surface(scopeId:Number, srf:{is:Number, base:HTMLCanvasElement, regions:Object|null, elements:Object|null, animations:Object|null}):Surface
   constructor: (@scopeId, srf, @surfaces)->
     @is = srf.is
     @base = srf.base
     @regions = srf.regions || {}
     @animations = srf.animations || {}
     @canvas = SurfaceUtil.copy(@base)
-    @destructed = false
     @layers = []
+    @stop = false
     @listener = ->
     $(@canvas).on "click", (ev)=>
       Surface.processMouseEvent(ev, @scopeId, @regions, "OnMouseClick", (ev)=> @listener(ev))
@@ -26,6 +26,7 @@ class Surface
       .keys(@animations)
       .forEach (name)=>
         {is:_is, interval, pattern} = @animations[name]
+        interval = interval || ""
         tmp = interval.split(",")
         interval = tmp[0]
         n = Number(tmp.slice(1).join(","))
@@ -41,7 +42,7 @@ class Surface
   destructor: ->
     $(@canvas).off() # g.c.
     @stopAnimation()
-    @destructed = true
+    @layers = []
     undefined
   # Surface#render():void
   render: ->
@@ -74,14 +75,17 @@ class Surface
             {surface, wait} = pattern
             @layers[anim.is] = pattern
             @render()
+            if @stop then return console.info("animation stoped")
             setTimeout(resolve, wait*10))
       .reduce(((proA, proB)->
         proA.then(proB)), Promise.resolve())
-      .then(-> setTimeout(callback))
+      .then(-> if !@stop then setTimeout(callback))
       .catch((err)-> console.error err.stack)
     undefined
   # Surface#stopAnimation():void
   stopAnimation: (id)->
+    @stop = true
+    false
   # Surface.sometimes(callback:Function(callback:Function:void):void):void
   @sometimes = (callback)-> @random(callback, 2)
   # Surface.rarely(callback:Function(callback:Function:void):void):void
@@ -90,13 +94,14 @@ class Surface
   @random = (callback, n)->
       ms = 1
       ms++ while Math.round(Math.random() * 1000) > 1000/n
-      setTimeout(callback, ms*1000)
+      setTimeout((-> callback(-> Surface.random(callback, n))), ms*1000)
   # Surface.runonce(callback:Function(callback:Function:void):void):void
   @runonce = (callback)->
     callback()
   # Surface.always(callback:Function(callback:Function:void):void):void
   @always = (callback)->
-    callback -> callback()
+    callback ->
+      Surface.always(callback)
   # Surface.processMouseEvent(ev:jQueryEventObject, scopeId:Number, regions:{is:Number, top:Number, left:Number, right:Number, bottom:Number, name:String}, eventName:ShioriEventIDString, listener:Function(ev:ShioriEventObject):void):void
   @processMouseEvent = (ev, scopeId, regions, eventName, listener)->
     {left, top} = $(ev.target).offset()

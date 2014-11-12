@@ -20,11 +20,24 @@ $(function(){
     shell = new Shell();
     shell.load(nar, function(err, shell){
       if(!!err) return console.error(err.stack);
-      var srf = shell.getSurface(0, 2010);
-      srf.setEventListener(function(ev){
-        console.log(ev);
+
+      srf = null
+      function changeSurface(id){
+        if(!!srf) document.body.removeChild(srf.canvas);
+        if(!!srf) srf.destructor();
+        srf = shell.getSurface(0, id);
+        if(!srf) return;
+        srf.setEventListener(function(ev){
+          console.log(ev);
+        });
+        document.body.appendChild(srf.canvas);
+      }
+
+      changeSurface(2010);
+
+      $("#surfaceId").change(function(ev){
+        changeSurface(Number($(ev.target).val()))
       });
-      document.body.appendChild(srf.canvas);
     });
   });
 });
