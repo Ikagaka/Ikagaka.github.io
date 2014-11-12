@@ -8,36 +8,23 @@
 <script src="./vender/zepto.min.js"></script>
 <script src="./SurfaceUtil.js"></script>
 <script src="./Surface.js"></script>
+<script src="./Scope.js"></script>
+<script src="./Named.js"></script>
 <script src="./Shell.js"></script>
-<script src="./_Nar.js"></script>
+<script src="./Nar.js"></script>
 <script src="./Ikagaka.js"></script>
-<input id="surfaceId" type="number" value="2010" />
 <script>
 $(function(){
   nar = new Nar();
-  nar.loadFromURL("./vender/ku-ver06.1.nar", function(err, nar){
+  nar.loadFromURL("./vender/exice_z102.zip", function(err, nar){
     if(!!err) return console.error(err.stack);
     shell = new Shell();
     shell.load(nar, function(err, shell){
       if(!!err) return console.error(err.stack);
-
-      srf = null
-      function changeSurface(id){
-        if(!!srf) document.body.removeChild(srf.canvas);
-        if(!!srf) srf.destructor();
-        srf = shell.getSurface(0, id);
-        if(!srf) return;
-        srf.setEventListener(function(ev){
-          console.log(ev);
-        });
-        document.body.appendChild(srf.canvas);
-      }
-
-      changeSurface(2010);
-
-      $("#surfaceId").change(function(ev){
-        changeSurface(Number($(ev.target).val()))
-      });
+      named = new Named(shell)
+      named.scope(0).surface(0)
+      named.scope(1).surface(10)
+      $("body").append(named.element)
     });
   });
 });

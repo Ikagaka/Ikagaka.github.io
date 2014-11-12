@@ -2,19 +2,38 @@
 var Scope;
 
 Scope = (function() {
-  function Scope(scopeId) {
+  function Scope(scopeId, shell) {
     this.scopeId = scopeId;
+    this.shell = shell;
     this.$scope = $("<div />").addClass("scope").css({
       "bottom": "0px",
       "right": (this.scopeId * 240) + "px"
     });
+    this.$surface = $("<div />").addClass("surface");
     this.$balloon = $("<div />").addClass("balloon");
-    this.$scope.append(this.surface.canvas).append(this.$balloon);
+    this.$scope.append(this.$surface).append(this.$balloon);
+    this.element = this.$scope[0];
+    this.currentSurface = null;
+    this.currentBalloon = null;
   }
 
-  Scope.prototype.surface = function() {};
+  Scope.prototype.surface = function(surfaceId) {
+    if (arguments.length === 1) {
+      if (!!this.currentSurface) {
+        $(this.currentSurface.canvas).remove();
+      }
+      this.currentSurface = this.shell.getSurface(this.scopeId, surfaceId);
+      this.$surface.append(this.currentSurface.canvas);
+    }
+    return this.currentSurface;
+  };
 
-  Scope.prototype.baloon = function() {};
+  Scope.prototype.baloon = function(balloonId) {
+    if (arguments.length === 1) {
+      this.currentBalloon;
+    }
+    return this.currentBalloon;
+  };
 
   return Scope;
 
