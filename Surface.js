@@ -165,11 +165,13 @@ Surface = (function() {
       };
     })(this)).reduce((function(proA, proB) {
       return proA.then(proB);
-    }), Promise.resolve()).then(function() {
-      if (!this.stop) {
-        return setTimeout(callback);
-      }
-    })["catch"](function(err) {
+    }), Promise.resolve()).then((function(_this) {
+      return function() {
+        if (!_this.stop) {
+          return setTimeout(callback);
+        }
+      };
+    })(this))["catch"](function(err) {
       return console.error(err.stack);
     });
     return void 0;

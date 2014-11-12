@@ -79,7 +79,7 @@ class Surface
             setTimeout(resolve, wait*10))
       .reduce(((proA, proB)->
         proA.then(proB)), Promise.resolve())
-      .then(-> if !@stop then setTimeout(callback))
+      .then(=> if !@stop then setTimeout(callback))
       .catch((err)-> console.error err.stack)
     undefined
   # Surface#stopAnimation():void
@@ -100,8 +100,7 @@ class Surface
     callback()
   # Surface.always(callback:Function(callback:Function:void):void):void
   @always = (callback)->
-    callback ->
-      Surface.always(callback)
+    callback -> Surface.always(callback)
   # Surface.processMouseEvent(ev:jQueryEventObject, scopeId:Number, regions:{is:Number, top:Number, left:Number, right:Number, bottom:Number, name:String}, eventName:ShioriEventIDString, listener:Function(ev:ShioriEventObject):void):void
   @processMouseEvent = (ev, scopeId, regions, eventName, listener)->
     {left, top} = $(ev.target).offset()
