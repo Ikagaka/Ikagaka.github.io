@@ -6,38 +6,26 @@
 <script src="./vender/WMDescript.js"></script>
 <script src="./vender/XHRProxy.min.js"></script>
 <script src="./vender/zepto.min.js"></script>
-<script src="./ikagaka.js"></script>
+<script src="./SurfaceUtil.js"></script>
+<script src="./Surface.js"></script>
+<script src="./Shell.js"></script>
+<script src="./Nar.js"></script>
+<script src="./Ikagaka.js"></script>
 <input id="surfaceId" type="number" value="2010" />
 <script>
 $(function(){
-
-  new Ikagaka("./vender/ku-ver06.1.nar", function(err, ikgk){
+  nar = new Nar();
+  nar.loadFromURL("./vender/ku-ver06.1.nar", function(err, nar){
     if(!!err) return console.error(err.stack);
-
-    console.log(ikgk);
-
-    var srf = ikgk.getSurface(0, 2010);
-    srf.setEventListener(function(ev){
-      console.log(ev);
-    });
-    document.body.appendChild(srf.canvas);
-
-    $("#surfaceId").change(function(ev){
-      if(!!srf){
-        document.body.removeChild(srf.canvas);
-        srf.destructor();
-      }
-      srf = ikgk.getSurface(0, Number($(ev.target).val()));
-      if(!srf) return;
+    shell = new Shell();
+    shell.load(nar, function(err, shell){
+      if(!!err) return console.error(err.stack);
+      var srf = shell.getSurface(0, 2010);
       srf.setEventListener(function(ev){
         console.log(ev);
       });
-
       document.body.appendChild(srf.canvas);
     });
-
-
   });
-
 });
 </script>
