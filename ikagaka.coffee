@@ -24,7 +24,6 @@ class Surface
       .keys(@animations)
       .forEach (name)=>
         {is:_is, interval, pattern} = @animations[name]
-        console.log interval
         tmp = interval.split(",")
         interval = tmp[0]
         n = Number(tmp.slice(1).join(","))
@@ -34,26 +33,46 @@ class Surface
           when "random"    then @random(_is, n)
           when "runonce"   then @runonce(_is)
           when "always"    then @always(_is)
-    ###
-    do animate = =>
-      srfs = @surfaces.surfaces
-      @layers.forEach (layer)=>
-        {surface, type, wait, x, y} = layer
-        ovelay = Object
-          .keys(srfs)
-          .filter((srf)-> srf.is is surface)
-        ovelay
-        surface
-
-      requestAnimationFrame(animate)
-    ###
-  setEventListener: (@listener)->
+  setEventListener: (@listener)-> undefined
   destructor: ->
     $(@canvas).off() # g.c.
     @stopAnimation()
     @destructed = true
     @base = null
     @canvas = null
+  render: ->
+    srfs = @surfaces.surfaces
+    elements = @layers.reduce(((arr, layer)=>
+      if !layer then return arr
+      {surface, type, wait, x, y} = layer
+      if surface is -1 then return arr
+      hits = Object
+        .keys(srfs)
+        .filter((name)-> srfs[name].is is surface)
+      if hits.length is 0 then return arr
+      arr.concat({type, x, y, canvas: srfs[hits[hits.length-1]].base})
+    ), [])
+    Ikagaka.composeElements(@canvas, [{"type": "base", "canvas": @base}].concat(elements))
+  playAnimation: (animationId, callback)->
+    hits = Object
+      .keys(@animations)
+      .filter((name)=> @animations[name].is is animationId)
+    if hits.length is 0 then setTimeout(callback); return undefined
+    anim = @animations[hits[hits.length-1]]
+    anim.patterns
+      .map((pattern)=>
+        =>
+          new Promise (resolve, reject)=>
+            {surface, wait} = pattern
+            @layers[anim.is] = pattern
+            @render()
+            setTimeout(resolve, wait*10))
+      .reduce(((proA, proB)->
+        proA.then(proB)), Promise.resolve())
+      .then(-> setTimeout(callback))
+      .catch((err)-> console.error err.stack)
+    undefined
+  stopAnimation: (id)->
   sometimes: (animationId)-> @random(animationId, 2)
   rarely: (animationId)-> @random(animationId, 4)
   random: (animationId, n)->
@@ -70,10 +89,6 @@ class Surface
   always: (animationId)->
     if !@destructed
       @playAnimation(animationId, => @always(animationId))
-  playAnimation: (id, callback)->
-    console.log(id)
-    setTimeout((->callback()), 0)
-  stopAnimation: (id)->
   @processMouseEvent = (ev, scopeId, regions, eventName, listener)->
     {left, top} = $(ev.target).offset()
     offsetX = ev.pageX - left
@@ -193,14 +208,15 @@ class Ikagaka
     if elements.length is 0
     then target
     else
-      {canvas, is:_is, file, type, x, y} = elements[0]
+      {canvas, type, x, y} = elements[0]
       comporsed = switch type
-        when "base"    then Ikagaka.copyCanvas(canvas)
+        when "base"    then Ikagaka.overlayfastCanvas(target, canvas)
         when "overlay" then Ikagaka.overlayfastCanvas(target, canvas, x, y)
         when "overlayfast" then Ikagaka.overlayfastCanvas(target, canvas, x, y)
+        else console.error type
       Ikagaka.composeElements(comporsed, elements.slice(1))
-  @overlayfastCanvas = (base, part, x, y)->
-    ctx = base.getContext("2d")
+  @overlayfastCanvas = (target, part, x, y)->
+    ctx = target.getContext("2d")
     ctx.drawImage(part, x||0, y||0)
     target
   @transImage = (img)->

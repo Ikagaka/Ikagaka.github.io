@@ -57,7 +57,6 @@ Surface = (function() {
       return function(name) {
         var interval, n, pattern, tmp, _is, _ref;
         _ref = _this.animations[name], _is = _ref.is, interval = _ref.interval, pattern = _ref.pattern;
-        console.log(interval);
         tmp = interval.split(",");
         interval = tmp[0];
         n = Number(tmp.slice(1).join(","));
@@ -75,24 +74,11 @@ Surface = (function() {
         }
       };
     })(this));
-
-    /*
-    do animate = =>
-      srfs = @surfaces.surfaces
-      @layers.forEach (layer)=>
-        {surface, type, wait, x, y} = layer
-        ovelay = Object
-          .keys(srfs)
-          .filter((srf)-> srf.is is surface)
-        ovelay
-        surface
-    
-      requestAnimationFrame(animate)
-     */
   }
 
   Surface.prototype.setEventListener = function(listener) {
     this.listener = listener;
+    return void 0;
   };
 
   Surface.prototype.destructor = function() {
@@ -102,6 +88,77 @@ Surface = (function() {
     this.base = null;
     return this.canvas = null;
   };
+
+  Surface.prototype.render = function() {
+    var elements, srfs;
+    srfs = this.surfaces.surfaces;
+    elements = this.layers.reduce(((function(_this) {
+      return function(arr, layer) {
+        var hits, surface, type, wait, x, y;
+        if (!layer) {
+          return arr;
+        }
+        surface = layer.surface, type = layer.type, wait = layer.wait, x = layer.x, y = layer.y;
+        if (surface === -1) {
+          return arr;
+        }
+        hits = Object.keys(srfs).filter(function(name) {
+          return srfs[name].is === surface;
+        });
+        if (hits.length === 0) {
+          return arr;
+        }
+        return arr.concat({
+          type: type,
+          x: x,
+          y: y,
+          canvas: srfs[hits[hits.length - 1]].base
+        });
+      };
+    })(this)), []);
+    return Ikagaka.composeElements(this.canvas, [
+      {
+        "type": "base",
+        "canvas": this.base
+      }
+    ].concat(elements));
+  };
+
+  Surface.prototype.playAnimation = function(animationId, callback) {
+    var anim, hits;
+    hits = Object.keys(this.animations).filter((function(_this) {
+      return function(name) {
+        return _this.animations[name].is === animationId;
+      };
+    })(this));
+    if (hits.length === 0) {
+      setTimeout(callback);
+      return void 0;
+    }
+    anim = this.animations[hits[hits.length - 1]];
+    anim.patterns.map((function(_this) {
+      return function(pattern) {
+        return function() {
+          return new Promise(function(resolve, reject) {
+            var surface, wait;
+            surface = pattern.surface, wait = pattern.wait;
+            _this.layers[anim.is] = pattern;
+            _this.render();
+            return setTimeout(resolve, wait * 10);
+          });
+        };
+      };
+    })(this)).reduce((function(proA, proB) {
+      return proA.then(proB);
+    }), Promise.resolve()).then(function() {
+      return setTimeout(callback);
+    })["catch"](function(err) {
+      return console.error(err.stack);
+    });
+    return void 0;
+  };
+
+  Surface.prototype.stopAnimation = function(id) {};
 
   Surface.prototype.sometimes = function(animationId) {
     return this.random(animationId, 2);
@@ -143,15 +200,6 @@ Surface = (function() {
       })(this));
     }
   };
-
-  Surface.prototype.playAnimation = function(id, callback) {
-    console.log(id);
-    return setTimeout((function() {
-      return callback();
-    }), 0);
-  };
-
-  Surface.prototype.stopAnimation = function(id) {};
 
   Surface.processMouseEvent = function(ev, scopeId, regions, eventName, listener) {
     var event, left, offsetX, offsetY, top, _ref;
@@ -342,28 +390,30 @@ Ikagaka = (function() {
   };
 
   Ikagaka.composeElements = function(target, elements) {
-    var canvas, comporsed, file, type, x, y, _is, _ref;
+    var canvas, comporsed, type, x, y, _ref;
     if (elements.length === 0) {
       return target;
     } else {
-      _ref = elements[0], canvas = _ref.canvas, _is = _ref.is, file = _ref.file, type = _ref.type, x = _ref.x, y = _ref.y;
+      _ref = elements[0], canvas = _ref.canvas, type = _ref.type, x = _ref.x, y = _ref.y;
       comporsed = (function() {
         switch (type) {
           case "base":
-            return Ikagaka.copyCanvas(canvas);
+            return Ikagaka.overlayfastCanvas(target, canvas);
           case "overlay":
             return Ikagaka.overlayfastCanvas(target, canvas, x, y);
           case "overlayfast":
             return Ikagaka.overlayfastCanvas(target, canvas, x, y);
+          default:
+            return console.error(type);
         }
       })();
       return Ikagaka.composeElements(comporsed, elements.slice(1));
     }
   };
 
-  Ikagaka.overlayfastCanvas = function(base, part, x, y) {
+  Ikagaka.overlayfastCanvas = function(target, part, x, y) {
     var ctx;
-    ctx = base.getContext("2d");
+    ctx = target.getContext("2d");
     ctx.drawImage(part, x || 0, y || 0);
     return target;
   };
