@@ -36,7 +36,6 @@ class Surface
           when "random"    then Surface.random   ((callback)=> @playAnimation(_is, callback)), n
           when "runonce"   then Surface.runonce   (callback)=> @playAnimation(_is, callback)
           when "always"    then Surface.always    (callback)=> @playAnimation(_is, callback)
-        undefined
   # Surface#setEventListener(listener:Function(ev:ShioriEventObject):void):void
   setEventListener: (@listener)-> undefined
   # Surface#destructor():void
