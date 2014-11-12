@@ -14,6 +14,7 @@ Surface = (function() {
     this.regions = srf.regions || {};
     this.animations = srf.animations || {};
     this.canvas = SurfaceUtil.copy(this.base);
+    this.element = this.canvas;
     this.layers = [];
     this.stop = false;
     this.listener = function() {};

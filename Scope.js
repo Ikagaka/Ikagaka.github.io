@@ -9,28 +9,41 @@ Scope = (function() {
       "bottom": "0px",
       "right": (this.scopeId * 240) + "px"
     });
-    this.$surface = $("<div />").addClass("surface");
-    this.$balloon = $("<div />").addClass("balloon");
-    this.$scope.append(this.$surface).append(this.$balloon);
+    this.$style = $("<style scoped />").html(".scope {\n  position: absolute;\n  border: none;\n  margin: 0px;\n  padding: 0px;\n  -webkit-user-select:none;\n  -webkit-tap-highlight-color:transparent;\n}\n.balloon {\n  position: absolute;\n  top: " + (this.shell.descript["sakura.balloon.offsetx"] || 0) + "px;\n  left: " + (this.shell.descript["sakura.balloon.offsety"] || 0) + "px;\n}");
+    this.$surface = $("<div />").addClass("surface").hide();
+    this.$balloon = $("<div />").addClass("balloon").hide();
+    this.$scope.append(this.$surface).append(this.$balloon).append(this.$style);
     this.element = this.$scope[0];
     this.currentSurface = null;
-    this.currentBalloon = null;
+    this.currentBalloon = new Balloon(shell);
   }
 
   Scope.prototype.surface = function(surfaceId) {
-    if (arguments.length === 1) {
+    if (surfaceId === -1) {
+      this.$surface.hide();
+    } else {
+      this.$surface.show();
+    }
+    if (surfaceId !== void 0) {
       if (!!this.currentSurface) {
-        $(this.currentSurface.canvas).remove();
+        $(this.currentSurface.element).remove();
       }
       this.currentSurface = this.shell.getSurface(this.scopeId, surfaceId);
-      this.$surface.append(this.currentSurface.canvas);
+      if (!!this.currentSurface) {
+        this.$surface.append(this.currentSurface.element);
+      }
     }
     return this.currentSurface;
   };
 
-  Scope.prototype.baloon = function(balloonId) {
-    if (arguments.length === 1) {
-      this.currentBalloon;
+  Scope.prototype.balloon = function(balloonId) {
+    if (balloonId === -1) {
+      this.$balloon.hide();
+    } else {
+      this.$balloon.show();
+    }
+    if (!!this.currentBalloon) {
+      this.$balloon.append(this.currentBalloon.element);
     }
     return this.currentBalloon;
   };

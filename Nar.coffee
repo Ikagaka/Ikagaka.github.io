@@ -3,6 +3,7 @@ class Nar
   XHRProxy = window["XHRProxy"] || window["XMLHttpRequest"]
   Encoding = window["Encoding"]
   JSZip = window["JSZip"]
+  WMDescript = window["WMDescript"]
   constructor: ->
     @tree = null
   # Nar#loadFromBuffer(buffer:ArrayBuffer, callback:Function(err:Error|null, nar:Nar|null):void ):void
@@ -43,3 +44,6 @@ class Nar
     xhr.open("GET", url)
     xhr.send()
     undefined
+  # Nar.readDescript(text:String):{[key:String]: value:String}
+  @readDescript = (text)->
+    WMDescript.parse(text)

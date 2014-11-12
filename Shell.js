@@ -8,17 +8,20 @@ Shell = (function() {
 
   jsyaml = window["jsyaml"];
 
-  function Shell() {
+  function Shell(nar) {
+    this.nar = nar;
     this.surfaces = null;
+    this.descript = null;
   }
 
-  Shell.prototype.load = function(nar, callback) {
+  Shell.prototype.load = function(shellName, callback) {
     var merged, surfaces, text, tree;
-    tree = nar.tree;
-    text = Nar.convert(tree["shell"]["master"]["surfaces.txt"].asArrayBuffer());
+    tree = this.nar.tree;
+    this.descript = Nar.readDescript(Nar.convert(tree["shell"][shellName]["descript.txt"].asArrayBuffer()));
+    text = Nar.convert(tree["shell"][shellName]["surfaces.txt"].asArrayBuffer());
     surfaces = Shell.parseSurfaces(text);
-    merged = Shell.mergeSurfacesAndSurfacesFiles(surfaces, tree["shell"]["master"]);
-    return Shell.loadSurfaces(merged, tree["shell"]["master"], (function(_this) {
+    merged = Shell.mergeSurfacesAndSurfacesFiles(surfaces, tree["shell"][shellName]);
+    return Shell.loadSurfaces(merged, tree["shell"][shellName], (function(_this) {
       return function(err, loaded) {
         if (!!err) {
           return callback(err, null);

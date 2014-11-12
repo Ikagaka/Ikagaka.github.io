@@ -2,9 +2,17 @@
 var Balloon;
 
 Balloon = (function() {
-  function Balloon() {}
+  function Balloon(shell) {
+    this.shell = shell;
+    this.$balloon = $("<div />").addClass("box");
+    this.$style = $("<style scoped />").html(".box {\n  background: #ccc;\n  height: 150px;\n  width: 300px;\n  overflow-y: scroll;\n  white-space: pre;\n  white-space: pre-wrap;\n  white-space: pre-line;\n  word-wrap: break-word;\n}\n.anchor,.select{\n  color:red;\n  cursor:pointer;\n}\n.anchor:hover,.select:hover{\n  background-color:violet;\n}");
+    this.$balloon.append(this.$style);
+    this.element = this.$balloon[0];
+  }
 
-  Balloon.prototype.text = function(text) {};
+  Balloon.prototype.talk = function(text) {};
+
+  Balloon.prototype.clear = function() {};
 
   return Balloon;
 

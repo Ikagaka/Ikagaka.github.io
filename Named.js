@@ -5,7 +5,7 @@ Named = (function() {
   function Named(shell) {
     this.shell = shell;
     this.$named = $("<div />").addClass("named");
-    this.$style = $("<style scoped />").html(".named .scope{\n  position: absolute;\n  border: none;\n  margin: 0px;\n  padding: 0px;\n  -webkit-user-select:none;\n  -webkit-tap-highlight-color:transparent;\n}\n.anchor,.select{\n  color:red;\n  cursor:pointer;\n}\n.anchor:hover,.select:hover{\n  background-color:violet;\n}");
+    this.$style = $("<style scoped />").html("");
     this.$named.append(this.$style);
     this.element = this.$named[0];
     this.scopes = [];
@@ -13,10 +13,8 @@ Named = (function() {
   }
 
   Named.prototype.scope = function(scopeId) {
-    if (arguments.length === 1) {
-      if (!this.scopes[scopeId]) {
-        this.scopes[scopeId] = new Scope(scopeId, this.shell);
-      }
+    if (scopeId !== void 0 && !this.scopes[scopeId]) {
+      this.scopes[scopeId] = new Scope(scopeId, this.shell);
       this.currentScope = this.scopes[scopeId];
       this.$named.append(this.scopes[scopeId].element);
     }

@@ -2,15 +2,18 @@
 class Shell
   SurfacesTxt2Yaml = window["SurfacesTxt2Yaml"]
   jsyaml  = window["jsyaml"]
-  constructor: ->
+
+  constructor: (@nar)->
     @surfaces = null
+    @descript = null
   # Shell#load(nar:Nar, callback:Function(err:Error|null, shell:Shell|null):void):void
-  load: (nar, callback)->
-    tree = nar.tree
-    text = Nar.convert(tree["shell"]["master"]["surfaces.txt"].asArrayBuffer())
+  load: (shellName, callback)->
+    tree = @nar.tree
+    @descript = Nar.readDescript(Nar.convert(tree["shell"][shellName]["descript.txt"].asArrayBuffer()))
+    text = Nar.convert(tree["shell"][shellName]["surfaces.txt"].asArrayBuffer())
     surfaces = Shell.parseSurfaces(text)
-    merged = Shell.mergeSurfacesAndSurfacesFiles(surfaces, tree["shell"]["master"])
-    Shell.loadSurfaces merged, tree["shell"]["master"], (err, loaded)=>
+    merged = Shell.mergeSurfacesAndSurfacesFiles(surfaces, tree["shell"][shellName])
+    Shell.loadSurfaces merged, tree["shell"][shellName], (err, loaded)=>
       if !!err then return callback(err, null)
       @surfaces = Shell.createBaseSurfaces(loaded)
       callback(null, @)

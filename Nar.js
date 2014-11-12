@@ -2,13 +2,15 @@
 var Nar;
 
 Nar = (function() {
-  var Encoding, JSZip, XHRProxy;
+  var Encoding, JSZip, WMDescript, XHRProxy;
 
   XHRProxy = window["XHRProxy"] || window["XMLHttpRequest"];
 
   Encoding = window["Encoding"];
 
   JSZip = window["JSZip"];
+
+  WMDescript = window["WMDescript"];
 
   function Nar() {
     this.tree = null;
@@ -75,6 +77,10 @@ Nar = (function() {
     xhr.open("GET", url);
     xhr.send();
     return void 0;
+  };
+
+  Nar.readDescript = function(text) {
+    return WMDescript.parse(text);
   };
 
   return Nar;

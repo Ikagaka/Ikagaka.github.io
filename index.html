@@ -8,6 +8,7 @@
 <script src="./vender/zepto.min.js"></script>
 <script src="./SurfaceUtil.js"></script>
 <script src="./Surface.js"></script>
+<script src="./Balloon.js"></script>
 <script src="./Scope.js"></script>
 <script src="./Named.js"></script>
 <script src="./Shell.js"></script>
@@ -18,12 +19,14 @@ $(function(){
   nar = new Nar();
   nar.loadFromURL("./vender/exice_z102.zip", function(err, nar){
     if(!!err) return console.error(err.stack);
-    shell = new Shell();
-    shell.load(nar, function(err, shell){
+    shell = new Shell(nar);
+    shell.load("master", function(err, shell){
       if(!!err) return console.error(err.stack);
-      named = new Named(shell)
-      named.scope(0).surface(0)
-      named.scope(1).surface(10)
+      console.log(shell);
+      named = new Named(shell);
+      named.scope(0).surface(0);
+      //named.scope().balloon();
+      named.scope(1).surface(10);
       $("body").append(named.element)
     });
   });

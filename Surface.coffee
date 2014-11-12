@@ -9,6 +9,7 @@ class Surface
     @regions = srf.regions || {}
     @animations = srf.animations || {}
     @canvas = SurfaceUtil.copy(@base)
+    @element = @canvas
     @layers = []
     @stop = false
     @listener = ->
