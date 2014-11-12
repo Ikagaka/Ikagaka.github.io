@@ -6,30 +6,38 @@
 <script src="./vender/WMDescript.js"></script>
 <script src="./vender/XHRProxy.min.js"></script>
 <script src="./vender/zepto.min.js"></script>
+<script src="./vender/shiorijk.js"></script>
+<script src="./SakuraScriptPlayer.js"></script>
 <script src="./SurfaceUtil.js"></script>
 <script src="./Surface.js"></script>
 <script src="./Balloon.js"></script>
 <script src="./Scope.js"></script>
 <script src="./Named.js"></script>
+<script src="./Ghost.js"></script>
 <script src="./Shell.js"></script>
-<script src="./Nar.js"></script>
 <script src="./Ikagaka.js"></script>
+<script src="./Nar.js"></script>
 <script>
 $(function(){
-  nar = new Nar();
+  var nar = new Nar();
   nar.loadFromURL("./vender/exice_z102.zip", function(err, nar){
     if(!!err) return console.error(err.stack);
-    shell = new Shell(nar);
+
+    var shell = new Shell(nar); // Shell loader
     shell.load("master", function(err, shell){
       if(!!err) return console.error(err.stack);
-      console.log(shell);
-      named = new Named(shell);
-      named.scope(0).surface(0);
-      named.scope().balloon().talk("hello world!");
-      named.scope(1).surface(10);
-      named.scope().balloon().talk("hello world!");
-      named.scope(0);
-      $("body").append(named.element);
+
+      var ghost = new Ghost(nar); // Shiori Wrapper
+      ghost.load("master", function(err, ghost){
+        if(!!err) return console.error(err.stack);
+
+        var ikgk = new Ikagaka(nar);
+        ikgk.materialize(shell, ghost, function(err, ikgk){
+          if(!!err) return console.error(err.stack);
+
+          $("body").append(ikgk.element);
+        });
+      });
     });
   });
 });

@@ -14,6 +14,7 @@ Scope = (function() {
     this.$balloon = $("<div />").addClass("balloon").hide();
     this.$scope.append(this.$surface).append(this.$balloon).append(this.$style);
     this.element = this.$scope[0];
+    this.listener = function() {};
     this.currentSurface = null;
     this.currentBalloon = new Balloon(shell);
   }
@@ -26,9 +27,17 @@ Scope = (function() {
     }
     if (surfaceId !== void 0) {
       if (!!this.currentSurface) {
+        this.currentSurface.destructor();
+      }
+      if (!!this.currentSurface) {
         $(this.currentSurface.element).remove();
       }
       this.currentSurface = this.shell.getSurface(this.scopeId, surfaceId);
+      this.currentSurface.setEventListener((function(_this) {
+        return function(ev) {
+          return _this.listener(ev);
+        };
+      })(this));
       if (!!this.currentSurface) {
         this.$surface.append(this.currentSurface.element);
       }
@@ -46,6 +55,11 @@ Scope = (function() {
       this.$balloon.append(this.currentBalloon.element);
     }
     return this.currentBalloon;
+  };
+
+  Scope.prototype.setEventListener = function(listener) {
+    this.listener = listener;
+    return void 0;
   };
 
   return Scope;

@@ -28,6 +28,7 @@ class Scope
       .append(@$balloon)
       .append(@$style)
     @element = @$scope[0]
+    @listener = ->
     @currentSurface = null
     @currentBalloon = new Balloon(shell)
   # Scope#surface(surfaceId:Number|Undefined):Surface|null
@@ -36,8 +37,10 @@ class Scope
     then @$surface.hide()
     else @$surface.show()
     if surfaceId isnt undefined
+      @currentSurface.destructor() if !!@currentSurface
       $(@currentSurface.element).remove() if !!@currentSurface
       @currentSurface = @shell.getSurface(@scopeId, surfaceId)
+      @currentSurface.setEventListener (ev)=> @listener(ev)
       @$surface.append(@currentSurface.element) if !!@currentSurface
     @currentSurface
   # Scope#baloon(balloonId:Number|Undefined):Balloon|null
@@ -47,3 +50,5 @@ class Scope
     else @$balloon.show()
     @$balloon.append(@currentBalloon.element) if !!@currentBalloon
     @currentBalloon
+  # Scope#setEventListener(listener:Function(ev:ShioriEventObject):void):void
+  setEventListener: (@listener)-> undefined

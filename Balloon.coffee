@@ -45,3 +45,6 @@ class Balloon
   clear: ->
     @$text.html("")
     undefined
+  br: ->
+    @talk("<br />")
+    undefined

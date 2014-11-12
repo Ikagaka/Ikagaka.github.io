@@ -10,17 +10,28 @@ Named = (function() {
     this.element = this.$named[0];
     this.scopes = [];
     this.currentScope = null;
+    this.listener = function() {};
   }
 
   Named.prototype.scope = function(scopeId) {
     if (scopeId !== void 0) {
       if (!this.scopes[scopeId]) {
         this.scopes[scopeId] = new Scope(scopeId, this.shell);
+        this.scopes[scopeId].setEventListener((function(_this) {
+          return function(ev) {
+            return _this.listener(ev);
+          };
+        })(this));
       }
       this.currentScope = this.scopes[scopeId];
       this.$named.append(this.scopes[scopeId].element);
     }
     return this.currentScope;
+  };
+
+  Named.prototype.setEventListener = function(listener) {
+    this.listener = listener;
+    return void 0;
   };
 
   return Named;

@@ -21,6 +21,11 @@ Balloon = (function() {
     return void 0;
   };
 
+  Balloon.prototype.br = function() {
+    this.talk("<br />");
+    return void 0;
+  };
+
   return Balloon;
 
 })();
