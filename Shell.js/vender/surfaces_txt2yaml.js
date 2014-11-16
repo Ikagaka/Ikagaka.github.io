@@ -149,7 +149,7 @@ SurfacesTxt2Yaml.Parser = (function() {
                   parsed_data[scope][scope_id_value].base = [];
                 }
                 if (-1 === parsed_data[scope][scope_id_value].base.indexOf(scope_id_str)) {
-                  parsed_data[scope][scope_id_value].base.unshift(scope_id_str);
+                  parsed_data[scope][scope_id_value].base.push(scope_id_str);
                 }
               }
             }
@@ -686,11 +686,11 @@ SurfacesTxt2Yaml.ScopeParser.surface = (function(_super) {
       case 'add':
       case 'reduce':
       case 'move':
-        _ref1 = [surface, wait], args.surface = _ref1[0], args.wait = _ref1[1];
+        _ref1 = [surface, wait * 10], args.surface = _ref1[0], args.wait = _ref1[1];
         _ref2 = args_str.split(','), args.x = _ref2[0], args.y = _ref2[1];
         break;
       case 'base':
-        _ref3 = [surface, wait], args.surface = _ref3[0], args.wait = _ref3[1];
+        _ref3 = [surface, wait * 10], args.surface = _ref3[0], args.wait = _ref3[1];
         break;
       case 'insert':
       case 'start':
