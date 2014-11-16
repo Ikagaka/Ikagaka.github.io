@@ -1,0 +1,76 @@
+<script src="./vender/encoding.js"></script>
+<script src="./vender/jszip.min.js"></script>
+<script src="./vender/XHRProxy.min.js"></script>
+<script src="./vender/WMDescript.js"></script>
+<script src="./vender/Nar.js"></script>
+<script src="./vender/surfaces_txt2yaml.js"></script>
+<script src="./vender/underscore-min.js"></script>
+<script src="./vender/zepto.min.js"></script>
+<script src="./SurfaceUtil.js"></script>
+<script src="./Surface.js"></script>
+<script src="./Shell.js"></script>
+<p>
+  nar: <input type="file" id="nar" />
+  surface: <input type="number" value="0" id="surfaceId" />
+</p>
+<script>
+var nar = null;
+
+$("#nar").change(function(ev){
+  nar = new Nar()
+  nar.loadFromBlob(ev.target.files[0], loadHandler);
+});
+
+nar = new Nar()
+nar.loadFromURL("./vender/mobilemaster.nar", loadHandler);
+
+
+function loadHandler(err){
+  if(!!err) return console.error(err.stack);
+
+  console.log(nar);
+
+  if(nar.install.type === "ghost"){
+    var shellDir = Object.keys(nar.directory)
+      .filter(function(path){ return /shell\/master\//.test(path); })
+      .reduce(function(dir, path, zip){ dir[path.replace(/shell\/master\//, "")] = nar.directory[path]; return dir; }, {})
+    var shell = new Shell(shellDir);
+  }else if(nar.install.type === "shell"){
+    var shell = new Shell(nar.directory);
+  }else{
+    throw new Error("wrong nar file")
+  }
+
+  shell.load(function(err){
+    if(!!err) return console.error(err.stack);
+
+    console.log(shell);
+
+    $div = $("<div style='display:inline-block;' />")
+      .appendTo("body");
+
+    $("#surfaceId").change(function(ev){ changeSurface(Number($(ev.target).val())); });
+
+    var surface;
+
+    changeSurface(0);
+
+    function changeSurface(n){
+      if(surface != null){
+        $(surface.element).remove();
+        surface.destructor();
+      }
+      surface = shell.getSurface(0, n);
+      console.log(surface);
+      if(surface != null){
+        $(surface.element).on("IkagakaSurfaceEvent", function(ev){
+          console.log(ev.detail);
+        });
+        $($div).append(surface.element);
+      }
+    }
+
+  });
+
+}
+</script>
