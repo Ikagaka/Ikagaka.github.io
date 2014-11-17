@@ -1,0 +1,17 @@
+{
+  "name": "ikagaka.github.io",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "scripts": {
+  },
+  "dependencies": {
+    "ikagaka.nar.js": "",
+    "ikagaka.shell.js": "",
+    "ikagaka.ghost.js": "",
+    "ikagaka.balloon.js": ""
+  },
+  "devDependencies": {
+  },
+  "license": "MIT"
+}
