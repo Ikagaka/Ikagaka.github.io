@@ -10,7 +10,8 @@
     "ikagaka.shell.js": "",
     "ikagaka.ghost.js": "",
     "ikagaka.balloon.js": "",
-    "ikagaka.sakurascriptplayer.js": ""
+    "ikagaka.sakurascriptplayer.js": "",
+    "es6-shim": ""
   },
   "devDependencies": {
   },
