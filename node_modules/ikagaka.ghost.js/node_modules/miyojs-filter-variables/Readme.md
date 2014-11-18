@@ -55,7 +55,7 @@ ghost/masterをカレントディレクトリとして同様に
 依存
 ----------------------------------------
 
-このフィルタのうち一部(variables_set, variables_temporary_set)は以下に依存します。
+このフィルタは以下に依存します。
 
 - [miyojs-filter-property](https://github.com/Narazaka/miyojs-filter-property.git)
 
@@ -107,14 +107,20 @@ Miyoのインスタンスにvariables_saveメソッドが追加されます。
 
 またフィルタからも同機能を呼ぶことが出来ます。
 
-variables_saveはファイル名を引数に取り、そのファイルへ変数を保存します。
+variables_saveはfileでファイル名を引数に取り、そのファイルへ変数を保存します。
+
+errorプロパティは任意で、書き込みに失敗したときの処理を記述します。
+例外を吐く場合以外はerrorに指定される関数はstash.argumentをそのまま返してください。
 
     miyo.variables_save('./variables.save');
     
     OnSave:
     	filters: [variables_save]
     	argument:
-    		variables_save: ./variables.save
+    		variables_save:
+				file: ./variables.save
+				error.js: |
+					...
 
 ### variables_load
 
@@ -122,7 +128,10 @@ Miyoのインスタンスにvariables_loadメソッドが追加されます。
 
 またフィルタからも同機能を呼ぶことが出来ます。
 
-variables_loadはファイル名を引数に取り、そのファイルから変数をロードします。
+variables_loadはfileでファイル名を引数に取り、そのファイルから変数をロードします。
+
+errorプロパティは任意で、読み込みに失敗したときの処理を記述します。
+例外を吐く場合以外はerrorに指定される関数はstash.argumentをそのまま返してください。
 
 variables_saveでセーブされたファイルを扱えます。
 
@@ -131,7 +140,10 @@ variables_saveでセーブされたファイルを扱えます。
     OnSave:
     	filters: [variables_load]
     	argument:
-    		variables_load: ./variables.save
+    		variables_load:
+				file: ./variables.save
+				error.js: |
+					...
 
 ### variables_set
 

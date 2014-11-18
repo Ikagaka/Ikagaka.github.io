@@ -1,10 +1,26 @@
-chai = require 'chai'
+if require?
+	chai = require 'chai'
+else
+	chai = @chai
 chai.should()
 expect = chai.expect
-sinon = require 'sinon'
-Miyo = require 'miyojs'
-MiyoFilters = require '../variables.js'
-fs = require 'fs'
+if require?
+	chaiAsPromised = require 'chai-as-promised'
+else
+	chaiAsPromised = @chaiAsPromised
+chai.use chaiAsPromised
+if require?
+	sinon = require 'sinon'
+	Miyo = require 'miyojs'
+	MiyoFilters = require '../variables.js'
+else
+	sinon = @sinon
+	Miyo = @Miyo
+	MiyoFilters = @MiyoFilters
+if require?
+	fs = require 'fs'
+else
+	fs = @fs
 
 describe 'variables_initialize', ->
 	ms = null
@@ -20,117 +36,206 @@ describe 'variables_initialize', ->
 			argument:
 				value: 'dummy'
 	it 'should return original argument', ->
-		return_argument = ms.call_filters entry, null, '_load'
-		return_argument.should.be.deep.equal entry.argument
+		ms.call_filters entry, null, '_load'
+		.should.eventually.be.deep.equal entry.argument
 	it 'should define variables and methods', ->
 		ms.call_filters entry, null, '_load'
-		ms.variables.should.be.instanceof Object
-		ms.variables_temporary.should.be.instanceof Object
-		ms.variables_save.should.be.instanceof Function
-		ms.variables_load.should.be.instanceof Function
-	it 'should set miyo_template_stash', ->
-		ms.filters.miyo_template_stash = {}
-		ms.call_filters entry, null, '_load'
-		ms.variables.dummy = 'dummy'
-		ms.variables_temporary.dummy = 'dummy'
-		ms.filters.miyo_template_stash.should.have.property 'v'
-		ms.filters.miyo_template_stash.v.should.be.instanceof Function
-		ms.filters.miyo_template_stash.v.call(ms, request, 'OnTest').should.be.deep.equal ms.variables
-		ms.filters.miyo_template_stash.should.have.property 'vt'
-		ms.filters.miyo_template_stash.vt.should.be.instanceof Function
-		ms.filters.miyo_template_stash.vt.call(ms, request, 'OnTest').should.be.deep.equal ms.variables_temporary
+		.then ->
+			ms.variables.should.be.instanceof Object
+			ms.variables_temporary.should.be.instanceof Object
+			ms.variables_save.should.be.instanceof Function
+			ms.variables_load.should.be.instanceof Function
 
 describe 'variables_load', ->
 	ms = null
 	request = null
+	readFile = null
+	error = `undefined`
+	data = `undefined`
+	promise = null
 	beforeEach ->
+		error = `undefined`
+		data = `undefined`
 		ms = new Miyo()
 		for name, filter of MiyoFilters
 			ms.filters[name] = filter
-		request = sinon.stub()
-	it 'should read', ->
 		entry =
-			filters: ['variables_initialize']
-		ms.call_filters entry, null, '_load'
-		ms.variables_load('test/variables.json')
-		ms.variables.should.be.deep.equal {
-			var: 23
-			nest:
-				a: 1
-				b: 1
-		}
-	it 'should called from filter', ->
-		entry =
-			filters: ['variables_initialize', 'variables_load']
+			filters: ['miyo_require_filters', 'property_initialize', 'variables_initialize']
 			argument:
-				variables_load: 'test/variables.json'
-		ms.call_filters entry, null, '_load'
-		ms.variables.should.be.deep.equal {
+				miyo_require_filters: ['property']
+				property_initialize:
+					handlers: ['coffee', 'jse', 'js']
+		promise = ms.call_filters entry, null, '_load'
+		request = sinon.stub()
+		readFile = sinon.stub fs, 'readFile', (args...) ->
+			callback = args[args.length - 1]
+			if callback instanceof Function
+				callback(error, data)
+	afterEach ->
+		readFile.restore()
+	it 'should read', ->
+		variables = {
 			var: 23
 			nest:
 				a: 1
 				b: 1
 		}
-	it 'should throw with filter no argument', ->
+		data = JSON.stringify variables
+		promise
+		.then ->
+			ms.variables_load('test/variables.json')
+		.then ->
+			ms.variables.should.be.deep.equal variables
+	it 'should called from filter', ->
+		variables = {
+			var: 23
+			nest:
+				a: 1
+				b: 1
+		}
+		data = JSON.stringify variables
 		entry =
-			filters: ['variables_initialize', 'variables_load']
-		(-> ms.call_filters entry, null, '_load').should.throw /argument.variables_load undefined/
+			filters: ['variables_load']
+			argument:
+				variables_load:
+					file: 'test/variables.json'
+		promise
+		.then ->
+			ms.call_filters entry, null, '_load'
+		.then ->
+			ms.variables.should.be.deep.equal variables
+	it 'should reject on fs error', ->
+		error = 'error test'
+		promise
+		.then ->
+			ms.variables_load('test/variables.json')
+		.should.eventually.rejectedWith 'error test'
+	it 'filter should call error callback on fs error', ->
+		error = 'error test'
 		entry =
-			filters: ['variables_initialize', 'variables_load']
-			argument: {}
-		(-> ms.call_filters entry, null, '_load').should.throw /argument.variables_load undefined/
+			filters: ['variables_load']
+			argument:
+				variables_load:
+					file: 'test/variables.json'
+					'error.jse': 'stash.error'
+		promise
+		.then ->
+			ms.call_filters entry, null, '_load'
+		.then (argument) ->
+			argument.should.deep.equal error
+	it 'filter should return argument if no error callback on fs error', ->
+		error = 'error test'
+		entry =
+			filters: ['variables_load']
+			argument:
+				variables_load:
+					file: 'test/variables.json'
+		promise
+		.then ->
+			ms.call_filters entry, null, '_load'
+		.then (argument) ->
+			argument.should.deep.equal entry.argument
+	it 'should reject with filter no argument', ->
+		entry =
+			filters: ['variables_load']
+		promise
+		.then ->
+			ms.call_filters entry, null, '_load'
+		.should.eventually.rejectedWith /argument.variables_load.file undefined/
 
 describe 'variables_save', ->
 	ms = null
 	request = null
-	entry = null
-	writeFileSync = null
+	writeFile = null
+	error = `undefined`
+	promise = null
 	beforeEach ->
 		ms = new Miyo()
 		for name, filter of MiyoFilters
 			ms.filters[name] = filter
+		entry =
+			filters: ['miyo_require_filters', 'property_initialize', 'variables_initialize']
+			argument:
+				miyo_require_filters: ['property']
+				property_initialize:
+					handlers: ['coffee', 'jse', 'js']
+		promise = ms.call_filters entry, null, '_load'
 		request = sinon.stub()
-		writeFileSync = sinon.stub fs, 'writeFileSync'
+		writeFile = sinon.stub fs, 'writeFile', (args...) ->
+			callback = args[args.length - 1]
+			if callback instanceof Function
+				callback(error)
 	afterEach ->
-		writeFileSync.restore()
+		writeFile.restore()
 	it 'should write', ->
-		entry =
-			filters: ['variables_initialize']
-		ms.call_filters entry, null, '_load'
-		ms.variables = {
-			var: 23
-			nest:
-				a: 1
-				b: 1
-		}
-		ms.variables_save('test/variables.json')
-		writeFileSync.calledOnce.should.be.true
-		writeFileSync.firstCall.calledWith 'test/variables.json', JSON.stringify ms.variables, 'utf8'
+		promise
+		.then ->
+			ms.variables = {
+				var: 23
+				nest:
+					a: 1
+					b: 1
+			}
+			ms.variables_save('test/variables.json')
+		.then ->
+			writeFile.calledOnce.should.be.true
+			writeFile.firstCall.calledWith 'test/variables.json', JSON.stringify ms.variables, 'utf8'
 	it 'should called from filter', ->
-		entry =
-			filters: ['variables_initialize']
-		ms.call_filters entry, null, '_load'
-		ms.variables = {
-			var: 23
-			nest:
-				a: 1
-				b: 1
-		}
+		promise
+		.then ->
+			ms.variables = {
+				var: 23
+				nest:
+					a: 1
+					b: 1
+			}
+			entry =
+				filters: ['variables_save']
+				argument:
+					variables_save:
+						file: 'test/variables.json'
+			ms.call_filters entry, null, '_unload'
+		.then ->
+			writeFile.calledOnce.should.be.true
+			writeFile.firstCall.calledWith 'test/variables.json', JSON.stringify ms.variables, 'utf8'
+	it 'should reject on fs error', ->
+		error = 'error test'
+		promise
+		.then ->
+			ms.variables = var: 23
+			ms.variables_save('test/variables.json')
+		.should.eventually.rejectedWith 'error test'
+	it 'filter should call error callback on fs error', ->
+		error = 'error test'
 		entry =
 			filters: ['variables_save']
 			argument:
-				variables_save: 'test/variables.json'
-		ms.call_filters entry, null, '_unload'
-		writeFileSync.calledOnce.should.be.true
-		writeFileSync.firstCall.calledWith 'test/variables.json', JSON.stringify ms.variables, 'utf8'
-	it 'should throw with filter no argument', ->
-		entry =
-			filters: ['variables_initialize']
-		ms.call_filters entry, null, '_load'
+				variables_save:
+					file: 'test/variables.json'
+					'error.jse': 'stash.error'
+		promise
+		.then ->
+			ms.variables = var: 23
+			ms.call_filters entry, null, '_unload'
+		.then (argument) ->
+			argument.should.deep.equal error
+	it 'filter should return argument if no error callback on fs error', ->
+		error = 'error test'
 		entry =
 			filters: ['variables_save']
-		(-> ms.call_filters entry, null, '_unload').should.throw /argument.variables_save undefined/
-		entry =
-			filters: ['variables_save']
-			argument: {}
-		(-> ms.call_filters entry, null, '_unload').should.throw /argument.variables_save undefined/
+			argument:
+				variables_save:
+					file: 'test/variables.json'
+		promise
+		.then ->
+			ms.variables = var: 23
+			ms.call_filters entry, null, '_unload'
+		.then (argument) ->
+			argument.should.deep.equal entry.argument
+	it 'should reject with filter no argument', ->
+		promise
+		.then ->
+			entry =
+				filters: ['variables_save']
+			ms.call_filters entry, null, '_unload'
+		.should.eventually.rejectedWith /argument.variables_save.file undefined/

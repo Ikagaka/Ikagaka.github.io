@@ -9,7 +9,8 @@
     "ikagaka.nar.js": "",
     "ikagaka.shell.js": "",
     "ikagaka.ghost.js": "",
-    "ikagaka.balloon.js": ""
+    "ikagaka.balloon.js": "",
+    "ikagaka.sakurascriptplayer.js": ""
   },
   "devDependencies": {
   },
