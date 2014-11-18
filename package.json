@@ -6,12 +6,13 @@
   "scripts": {
   },
   "dependencies": {
+    "es6-shim": "",
     "ikagaka.nar.js": "",
     "ikagaka.shell.js": "",
     "ikagaka.ghost.js": "",
     "ikagaka.balloon.js": "",
     "ikagaka.sakurascriptplayer.js": "",
-    "es6-shim": ""
+    "ikagaka.ikagaka.js": ""
   },
   "devDependencies": {
   },
