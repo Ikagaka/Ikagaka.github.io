@@ -1,0 +1,7 @@
+{
+  "name": "sakurascriptplayer.demo",
+  "dependencies": {
+    "ikagaka.sakurascriptplayer.js": ""
+  },
+  "license":        "MIT"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "shell.demo",
+  "dependencies": {
+    "ikagaka.shell.js": ""
+  },
+  "license":        "MIT"
+}
