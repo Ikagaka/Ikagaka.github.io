@@ -10,7 +10,7 @@ clone = (src) ->
 copy = (source, destination) ->
 	if (source instanceof Object) and (not (source instanceof Array))
 		for key of source
-			if destination[key]?
+			if destination[key]? and destination[key] instanceof Object
 				copy source[key], destination[key]
 			else
 				destination[key] = clone source[key]
