@@ -1,7 +1,0 @@
-{
-  "name": "ikagaka.demo",
-  "dependencies": {
-    "ikagaka.ikagaka.js": ""
-  },
-  "license":        "MIT"
-}
